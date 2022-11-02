@@ -20,10 +20,11 @@ public class DataLoader implements CommandLineRunner {
 
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) throws NullPointerException {
         if(categoryRepository.count().block() == 0){
             System.out.println("Loading data on startup.");
 
+            // Nicer than setter methods
             categoryRepository.save(Category.builder().description("Nuts").build()).block();
             categoryRepository.save(Category.builder().description("Fruits").build()).block();
             categoryRepository.save(Category.builder().description("Vegetables").build()).block();
