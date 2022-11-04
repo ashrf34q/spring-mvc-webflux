@@ -7,9 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.reactivestreams.Publisher;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static org.mockito.ArgumentMatchers.any;
 
 
 class CategoryControllerTest {
@@ -47,5 +50,20 @@ class CategoryControllerTest {
                 .uri("/api/v1/categories/2431")
                 .exchange()
                 .expectBody(Category.class);
+    }
+
+
+    @Test
+    void createVendor(){
+        BDDMockito.given(categoryRepository.saveAll(any(Publisher.class)))
+                .willReturn(Flux.just(Category.builder().description("Nuts").build()));
+
+        Mono<Category> catToSave = Mono.just(Category.builder().description("Some category").build());
+
+        webTestClient.post().uri("/api/v1/categories")
+                .body(catToSave, Category.class)
+                .exchange()
+                .expectStatus()
+                .isCreated();
     }
 }
