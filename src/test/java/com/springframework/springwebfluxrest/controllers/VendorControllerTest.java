@@ -7,12 +7,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.reactivestreams.Publisher;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-class VendorControllerTest {
+import static org.mockito.ArgumentMatchers.any;
 
+
+class VendorControllerTest {
     WebTestClient webTestClient;
     @Mock
     VendorRepository vendorRepository;
@@ -48,5 +51,33 @@ class VendorControllerTest {
         webTestClient.get().uri("/api/v1/vendors/23")
                 .exchange()
                 .expectBody(Vendor.class);
+    }
+
+    @Test
+    void postVendor(){
+        BDDMockito.given(vendorRepository.saveAll(any(Publisher.class)))
+                .willReturn(Flux.just(Vendor.builder().build()));
+
+        Mono<Vendor> vendorToSave = Mono.just(Vendor.builder().firstName("Floki").build());
+
+        webTestClient.post().uri("/api/v1/vendors")
+                .body(vendorToSave, Vendor.class)
+                .exchange()
+                .expectStatus()
+                .isCreated();
+    }
+
+    @Test
+    void updateVendors(){
+        BDDMockito.given(vendorRepository.save(any(Vendor.class)))
+                .willReturn(Mono.just(Vendor.builder().build()));
+
+        Mono<Vendor> vendorToSave = Mono.just(Vendor.builder().firstName("Aethelwuf").build());
+
+        webTestClient.put().uri("/api/v1/vendors/3542")
+                .body(vendorToSave, Vendor.class)
+                .exchange()
+                .expectStatus()
+                .isOk();
     }
 }

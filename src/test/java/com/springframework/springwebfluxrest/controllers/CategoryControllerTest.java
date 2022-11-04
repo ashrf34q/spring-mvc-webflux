@@ -14,7 +14,6 @@ import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
 
-
 class CategoryControllerTest {
 
     WebTestClient webTestClient;
@@ -65,5 +64,21 @@ class CategoryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isCreated();
+    }
+
+    @Test
+    void updateCategory(){
+
+        // This acts just like the static when() method in mockMVC testing
+        BDDMockito.given(categoryRepository.save(any(Category.class)))
+                .willReturn(Mono.just(Category.builder().build()));
+
+        Mono<Category> catToSave = Mono.just(Category.builder().description("Some category").build());
+
+        webTestClient.put().uri("/api/v1/categories/234")
+                .body(catToSave, Category.class)
+                .exchange()
+                .expectStatus()
+                .isOk();
     }
 }
