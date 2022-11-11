@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+
 @RestController
 public class VendorController {
 
@@ -37,5 +40,21 @@ public class VendorController {
     Mono<Vendor> updateVendor(@PathVariable String id, @RequestBody Vendor vendor) {
         vendor.setId(id);
         return vendorRepository.save(vendor);
+    }
+
+    @PatchMapping("/api/v1/vendors/{id}")
+    Mono<Vendor> patchVendor(@PathVariable String id, @RequestBody Vendor vendor) throws ExecutionException, InterruptedException {
+        Vendor foundVendor = vendorRepository.findById(id).toFuture().get();
+
+        assert foundVendor != null;
+        if(!Objects.equals(vendor.getFirstName(), foundVendor.getFirstName())){
+            foundVendor.setFirstName(vendor.getFirstName());
+        }
+
+        else if(!Objects.equals(vendor.getLastName(), foundVendor.getLastName())) {
+            foundVendor.setLastName(vendor.getLastName());
+        }
+
+        return Mono.just(foundVendor);
     }
 }
